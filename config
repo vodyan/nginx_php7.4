@@ -1,0 +1,28 @@
+server {
+  listen 80 default_server;
+  listen [::]:80 default_server;
+  root /vagrant/public;
+  index index.html index.php;
+  server_name _;
+
+  client_max_body_size 30M;
+
+  access_log off;
+  error_log /vagrant/log/error.log;
+
+  if (!-e $request_filename) {
+    rewrite ^.*$ /index.php last;
+  }
+
+  location / {
+     try_files $uri $uri/ =404;
+  }
+
+  location ~ \.php$ {
+    fastcgi_pass    unix:/run/php/php7.4-fpm.sock;
+    fastcgi_index   index.php;
+    fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    fastcgi_param   APPLICATION_ENV development;
+    include         fastcgi_params;
+  }
+}
